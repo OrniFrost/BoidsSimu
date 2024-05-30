@@ -30,6 +30,7 @@ for _ in range(nb_boids):
         Boid(
             Vector2(rd.randint(0, x_max), rd.randint(0,y_max)),
             Vector2(rd.randint(- vitesse_max, vitesse_max), rd.randint(- vitesse_max,vitesse_max)),
+            Vector2(0,0),
         )
     )
 

@@ -3,11 +3,11 @@ from pygame import Vector2
 
 from Boid import Boid
 
-vitesse_max = 10
+
 
 facteur_cohesion = 1
 facteur_alignement = 1
-facteur_separation = 1.4
+facteur_separation = 2
 
 rayon_cohesion = 75
 rayon_alignement = 75
@@ -29,20 +29,17 @@ class Simulation:
             boid.pos.x %= self.dimension.x
             boid.pos.y %= self.dimension.y
 
-            nouvelle_vitesse = Vector2(0, 0)
+            nouvelle_acceleration = Vector2(0, 0)
             # cohesion
-            nouvelle_vitesse += self.calculerVitesseCohesion(boid) * facteur_cohesion
+            nouvelle_acceleration += self.calculerVitesseCohesion(boid) * facteur_cohesion
 
             # alignement
-            nouvelle_vitesse += self.calulerVitesseAlignement(boid) * facteur_alignement
+            nouvelle_acceleration += self.calulerVitesseAlignement(boid) * facteur_alignement
 
             # Separation
-            nouvelle_vitesse += self.calculerVitesseSeparation(boid) * facteur_separation
+            nouvelle_acceleration += self.calculerVitesseSeparation(boid) * facteur_separation
 
-            boid.vitesse += nouvelle_vitesse
-
-            if boid.vitesse.magnitude() >= vitesse_max:
-                boid.vitesse = boid.vitesse.normalize() * vitesse_max
+            boid.acceleration += nouvelle_acceleration
 
             boid.actualiser()
 

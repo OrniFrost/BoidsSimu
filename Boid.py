@@ -3,12 +3,14 @@ from pygame import Color
 from pygame.math import Vector2
 from random import  randint as ri
 
+vitesse_max = 10
 
 class Boid:
 
-    def __init__(self, pos=Vector2(0, 0), vitesse=Vector2(0, 0)):
+    def __init__(self, pos=Vector2(0, 0), vitesse=Vector2(0, 0), acceleration=Vector2(0,0)):
         self.pos = pos
         self.vitesse = vitesse
+        self.acceleration = acceleration
         self.color = Color([ri(100,255) for _ in range(3)])
 
 
@@ -27,4 +29,9 @@ class Boid:
 
 
     def actualiser(self):
+        self.vitesse += self.acceleration
+        self.acceleration = Vector2(0,0)
+        if self.vitesse.magnitude() >= vitesse_max:
+            self.vitesse = self.vitesse.normalize() * vitesse_max
+
         self.pos += self.vitesse
