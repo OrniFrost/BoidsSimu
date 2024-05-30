@@ -14,13 +14,14 @@ class Boid:
 
     def dessiner(self, screen):
         pygame.draw.circle(screen, "black", self.pos, 11)
-        pygame.draw.line(
-            screen,
-            "red",
-            self.pos,
-            self.vitesse.normalize()* self.vitesse.magnitude()*3 + self.pos,
-            4
-        )
+        if self.vitesse != Vector2(0, 0):
+            pygame.draw.line(
+                screen,
+                "red",
+                self.pos,
+                self.vitesse.normalize()* self.vitesse.magnitude()*3 + self.pos,
+                4
+            )
 
         pygame.draw.circle(screen, self.color, self.pos, 10)
 
