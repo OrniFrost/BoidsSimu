@@ -18,7 +18,7 @@ class Boid:
             screen,
             "red",
             self.pos,
-            self.vitesse.normalize()* self.vitesse.magnitude()*2 + self.pos,
+            self.vitesse.normalize()* self.vitesse.magnitude()*3 + self.pos,
             4
         )
 

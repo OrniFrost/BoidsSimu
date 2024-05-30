@@ -14,7 +14,7 @@ import random as rd
 x_max = 1280
 y_max = 720
 
-vitesse_max = 15
+vitesse_max = 10
 
 pygame.init()
 screen = pygame.display.set_mode((x_max, y_max))
@@ -42,6 +42,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONUP:
+            pos_click = Vector2(pygame.mouse.get_pos())
+            simulation.mettreEnEvidenceBoids(pos_click, 100)
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("white")
