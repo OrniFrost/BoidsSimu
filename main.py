@@ -22,7 +22,7 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-nb_boids = 30
+nb_boids = 200
 boids = []
 
 for _ in range(nb_boids):

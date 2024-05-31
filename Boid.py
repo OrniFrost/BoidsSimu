@@ -3,7 +3,7 @@ from pygame import Color
 from pygame.math import Vector2
 from random import  randint as ri
 
-vitesse_max = 10
+vitesse_max = 12
 
 class Boid:
 

@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+
 import pygame
 from pygame import Vector2
 
@@ -5,13 +7,16 @@ from Boid import Boid
 
 
 
-facteur_cohesion = 1
-facteur_alignement = 1
-facteur_separation = 2
+facteur_cohesion = 0.2
+facteur_alignement = 0.25
+facteur_separation = 1.25
 
 rayon_cohesion = 75
 rayon_alignement = 75
-rayon_separation = 25
+rayon_separation = 20
+
+
+
 
 class Simulation:
 
@@ -25,23 +30,30 @@ class Simulation:
             boid.dessiner(self.screen)
 
     def actualiser(self):
-        for boid in self.boids:
-            boid.pos.x %= self.dimension.x
-            boid.pos.y %= self.dimension.y
+        with ThreadPoolExecutor(max_workers=8) as executor:
 
-            nouvelle_acceleration = Vector2(0, 0)
-            # cohesion
-            nouvelle_acceleration += self.calculerVitesseCohesion(boid) * facteur_cohesion
+            executor.map(self.calculerForce, self.boids)
 
-            # alignement
-            nouvelle_acceleration += self.calulerVitesseAlignement(boid) * facteur_alignement
+    def calculerForce(self, boid: Boid):
+        boid.pos.x %= self.dimension.x
+        boid.pos.y %= self.dimension.y
 
-            # Separation
-            nouvelle_acceleration += self.calculerVitesseSeparation(boid) * facteur_separation
+        nouvelle_acceleration = Vector2(0, 0)
+        # cohesion
+        nouvelle_acceleration += self.calculerVitesseCohesion(boid) * facteur_cohesion
 
-            boid.acceleration += nouvelle_acceleration
+        # alignement
+        nouvelle_acceleration += self.calulerVitesseAlignement(boid) * facteur_alignement
 
-            boid.actualiser()
+        # Separation
+        nouvelle_acceleration += self.calculerVitesseSeparation(boid) * facteur_separation
+
+        # Force bordure
+        nouvelle_acceleration += self.calculerForceBordures(boid)
+
+        boid.acceleration += nouvelle_acceleration
+
+        boid.actualiser()
 
     def trouverVoisin(self, centre: Vector2, rayon: float) -> list[Boid]:
         liste_boids_voisins = []
@@ -77,7 +89,7 @@ class Simulation:
         vitesse_moyenne = somme_vitesse / len(liste_voisins)
         return vitesse_moyenne.normalize()
 
-    def calculerVitesseSeparation(self, boid_central) -> Vector2:
+    def calculerVitesseSeparation(self, boid_central: Boid) -> Vector2:
         liste_voisins = self.trouverVoisin(boid_central.pos, rayon_separation)
         vecteur_final = Vector2(0, 0)
         if not len(liste_voisins): return vecteur_final
@@ -85,3 +97,36 @@ class Simulation:
             vecteur_final += boid_central.pos - boid_voisin.pos
 
         return vecteur_final.normalize()
+
+    def calculerForceBordures(self, boid: Boid) -> Vector2:
+
+        dim = Vector2(self.screen.get_size())
+        # milieu = dim/2
+        # force_x = milieu.x - boid.pos.x
+        # force_y = milieu.y - boid.pos.y
+        #
+        # force = Vector2(force_x,force_y)
+        #
+        # return force.normalize() * force.magnitude()/500
+
+        force_bordure_gauche = Vector2(0, boid.pos.y) - boid.pos
+
+        force_bordure_droite = Vector2(dim.x, boid.pos.y) - boid.pos
+
+        force_bordure_haute = Vector2(boid.pos.x, 0) - boid.pos
+
+        force_bordure_basse = Vector2(boid.pos.x, dim.y) - boid.pos
+
+        # if force_bordure_gauche.magnitude() != 0: force_bordure_gauche *= 1 / force_bordure_gauche.magnitude()
+        # if force_bordure_droite.magnitude() != 0: force_bordure_droite *= 1 / force_bordure_droite.magnitude()
+        # if force_bordure_haute.magnitude() != 0: force_bordure_haute *= 1 / force_bordure_haute.magnitude()
+        # if force_bordure_basse.magnitude() != 0: force_bordure_basse *= 1 / force_bordure_basse.magnitude()
+
+
+        force_horizontal = force_bordure_gauche + force_bordure_droite
+        force_horizontal *= 1/force_horizontal.magnitude()*0.4
+
+        force_vertical = force_bordure_basse + force_bordure_haute
+        force_vertical *= 1/force_vertical.magnitude()*.5
+
+        return force_horizontal + force_vertical
